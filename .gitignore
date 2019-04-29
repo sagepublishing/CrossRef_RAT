@@ -1,0 +1,12 @@
+*.ipynb
+*.xlsx
+*.docx
+*.csv
+.ipynb*
+data*
+input*
+output*
+other*
+old*
+Notes*
+__pycache__*
