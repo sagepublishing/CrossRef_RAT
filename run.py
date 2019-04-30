@@ -4,7 +4,6 @@
 #
 # || S1_id | S1_Title | S1_abstract | S1_Authors | S1_sub_date | S1_rej_date | S1_journal | match_DOI | match_title | match_authors | match_publisher | match_journal | match_pub_date | earliest_cr_date | title_similarity | CR_score | CR_cites | days_since_rej ||
 #
-#
 
 import os
 import pandas as pd

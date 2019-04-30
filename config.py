@@ -5,8 +5,6 @@ Created on Mon May 14 16:52:20 2018
 @author: ADay
 """
 
-
-
 # enter your email address here
 # This program uses the CrossRef API extensively
 # adding your email address lets them know who is using it and
