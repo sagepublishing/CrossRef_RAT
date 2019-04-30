@@ -1,21 +1,34 @@
 # Rejected article tracker
 
-This simple program will take as input a spreadsheet of ScholarOne submission data and return a spreadsheet of articles based on the similarity of the titles and the author names.
+This simple program will take a spreadsheet of ScholarOne submission data as input and return a spreadsheet of published articles with similar titles and author-names.
+
+## How it works
 
 The process for obtaining this data is very simple and uses a utility made available by CrossRef.
-To search for an article by title, one simple adds a title to the end of this:
-?query.title=
-And add the author first name and last name to this
-&query.author=
-And then adds those to this:
-https://api.crossref.org/works
-The result, might be a url, like this:
-https://api.crossref.org/works?query.title=the%20origin%20of%20chemical%20elements&query.author=r+alpher
-Here, we are looking for a paper called ‘The origin of chemical elements’ by Ralph Alpher et al.
-Clicking on the above link shows that CrossRef was able to find the article despite not having a unique identifier (such as a DOI).  CrossRef remains good at this even when there are minor changes in the title of the work.
-Unfortunately the data CrossRef returns is in a format (called JSON) which can be hard to read for humans, so this program will take the results from CrossRef and convert them into an excel spreadsheet.
 
-## Set up
+- To search for an article by title, we simply add the title to the end of this:
+?query.title=
+- And add the author first name and last name to this
+&query.author=
+
+- And then add those to this:
+https://api.crossref.org/works
+- The result is a url like this. Here, we are looking for a paper called ‘The origin of chemical elements’ by Ralph Alpher et al.
+https://api.crossref.org/works?query.title=the%20origin%20of%20chemical%20elements&query.author=r+alpher
+
+Clicking on the above link shows that CrossRef was able to find the article despite not having a unique identifier (such as a DOI).  CrossRef remains good at this even when there are minor changes in the title of the work.
+
+With this in mind, we can use CrossRef to find rejected articles.  It's not perfect:
+- sometimes authors make significant changes to the titles of articles and sometimes author lists of papers change before publication.  So it won't always find a rejected article which has changed.
+- The utility will also occasionally mis-identify articles with similar titles.
+However, this is a simple, effective, and cheap method of tracking rejected articles and it should give you some insights into your journal's competitive position.
+
+The data CrossRef returns is in a format (called JSON) which can be hard to read for humans, so this program will take the results from CrossRef and convert them into an excel spreadsheet.  
+
+There are some obvious adaptations that users may wish to make. Some users may prefer to adapt the code to feed a database instead of working with spreadsheets.  Users who do not use ScholarOne may also wish to adapt the code to work with data from their submission system of choice.
+
+## Setup
+
 You will need the following pieces of software:
 -	The latest Python 3 version of Anaconda from continuum.io
 -	Once you have this, you will need to open a terminal and install a package called ‘fuzzywuzzy’
@@ -25,7 +38,7 @@ o	> pip install fuzzywuzzy
 o	‘allowed_cols’ in ‘tools.py’ will let you change which columns go into the script.  If you want to carry more columns from your input spreadsheet through to the output spreadsheet, you can add those columns to this list.
 o	‘rows’ in ‘payload’ sets the number of rows returned in the CrossRef search (100 is the maximum allowed by CrossRef without paging).  In order to generate the output, the script must iterate through each row of results looking for titles that match the query title.  The row where each result is found is stored in the ‘rank’ column of the output.  It may speed up the script to set ‘rows’ to a lower value if you find that good results tend to have ‘rank’ below a certain value.
 o	Currently, the search only looks for articles that were not accepted.  This is so that we can find instances where authors failed to resubmit a revised MS.  However, it appears to lead to a lot of false-positives where articles that were accepted but not marked as such.  If you would prefer a more strict search, go into tools.py and change this line:
-	> accs = df[df['Accept or Reject Final Decision'] == 'Accept']['raw_ms_id']
+	> accs = df[df['Accept or Reject Final Decision'] != 'Accept']['raw_ms_id']
 To this:
 	> accs = df[df['Accept or Reject Final Decision'] == 'Reject']['raw_ms_id']
 o	Another solution to the problem of Accepted articles might simply be to exclude the query journal from the results.
