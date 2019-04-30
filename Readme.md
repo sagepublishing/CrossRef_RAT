@@ -32,29 +32,39 @@ There are some obvious adaptations that users may wish to make. Some users may p
 You will need the following pieces of software:
 -	The latest Python 3 version of Anaconda from continuum.io
 -	Once you have this, you will need to open a terminal and install a package called ‘fuzzywuzzy’
-o	> pip install fuzzywuzzy
+```bash
+pip install fuzzywuzzy
+```
 -	You can configure the script in ‘config.py’.  The various options are explained in comments in that script.
 -	There are also a few configurations changes that you can make in the script
-o	‘allowed_cols’ in ‘tools.py’ will let you change which columns go into the script.  If you want to carry more columns from your input spreadsheet through to the output spreadsheet, you can add those columns to this list.
-o	‘rows’ in ‘payload’ sets the number of rows returned in the CrossRef search (100 is the maximum allowed by CrossRef without paging).  In order to generate the output, the script must iterate through each row of results looking for titles that match the query title.  The row where each result is found is stored in the ‘rank’ column of the output.  It may speed up the script to set ‘rows’ to a lower value if you find that good results tend to have ‘rank’ below a certain value.
-o	Currently, the search only looks for articles that were not accepted.  This is so that we can find instances where authors failed to resubmit a revised MS.  However, it appears to lead to a lot of false-positives where articles that were accepted but not marked as such.  If you would prefer a more strict search, go into tools.py and change this line:
-	> accs = df[df['Accept or Reject Final Decision'] != 'Accept']['raw_ms_id']
+  -	‘allowed_cols’ in ‘tools.py’ will let you change which columns go into the script.  If you want to carry more columns from your input spreadsheet through to the output spreadsheet, you can add those columns to this list.
+  -	‘rows’ in ‘payload’ sets the number of rows returned in the CrossRef search (100 is the maximum allowed by CrossRef without paging).  In order to generate the output, the script must iterate through each row of results looking for titles that match the query title.  The row where each result is found is stored in the ‘rank’ column of the output.  It may speed up the script to set ‘rows’ to a lower value if you find that good results tend to have ‘rank’ below a certain value.
+  -	Currently, the search only looks for articles that were not accepted.  This is so that we can find instances where authors failed to resubmit a revised MS.  However, it appears to lead to a lot of false-positives where articles that were accepted but not marked as such.  If you would prefer a more strict search, go into tools.py and change this line:
+```python 
+accs = df[df['Accept or Reject Final Decision'] != 'Accept']['raw_ms_id']
+```
 To this:
-	> accs = df[df['Accept or Reject Final Decision'] == 'Reject']['raw_ms_id']
-o	Another solution to the problem of Accepted articles might simply be to exclude the query journal from the results.
+```python
+accs = df[df['Accept or Reject Final Decision'] == 'Reject']['raw_ms_id']
+```
+-	Another solution to the problem of Accepted articles might simply be to exclude the query journal from the results.
 
 
 ## Usage
 
 From Scholar One under  ‘Peer Review Details Reports’ select ‘Build Your Own Reports’.  The report should have the following columns:
-['Journal Name', 'Manuscript Type',	'Manuscript ID',	'Manuscript Title',	'Author Names',
+
+> ['Journal Name', 'Manuscript Type',	'Manuscript ID',	'Manuscript Title',	'Author Names',
  'Submission Date',	'Decision Date',	'Decision Type', 'Accept or Reject Final Decision']
-If you already have a report that includes these columns, it’s ok to include those in the report, but they are not needed and will be ignored by the script.
-Important: remember to download your report as Excel 2007 Data Format.
-Copy the report to the ‘input’ folder
-Check the settings in config.py
+ 
+If you already have a report that includes these columns and other columns as well, it’s ok to include those other columns in the report, but they are not needed and will be ignored by the script. **Important:** remember to download your report as Excel 2007 Data Format.
+
+- Copy the report to the ‘input’ folder
+- Check the settings in config.py
 Open a terminal and type:
-	python run.py
+```bash
+python run.py
+```
 The process here is very slow.  Expect to wait around 3 seconds per input article.  However, you can stop the script (ctrl+c) any time and restart where you left-off (as long as you don’t delete anything in the ‘data’ folder - which stores your progress).  
 If you simply want to update the existing output with additional data, you can just add another file to ‘input’ and run again.  However, if you want to run the code again with a different dataset, it may be wise to delete all of the files in the ‘data’ folder.
 
