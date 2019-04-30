@@ -16,8 +16,8 @@ myemail = ""
 
 # set a threshold for Levenshtein distance between titles
 # CrossRef will return all results remotely similar to the title of each
-# rejected article. Generally, I find it's unlikely to have a good result
-# if the Levenshtein distance is below 70
+# rejected article. Generally, I find it's likely to have a bad results
+# if the Levenshtein distance is below 70, but this varies.
 threshold = 70
 
 # what submission date-range do you want to consider?

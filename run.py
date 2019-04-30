@@ -21,6 +21,16 @@ dates = c.dates
 myemail = c.myemail
 threshold = c.threshold
 
+## Requires 3 folders.  Create them if they don't exist
+folder_names = ['data','input','output']
+for fn in folder_names:
+    if not os.path.exists(fn):
+        os.mkdir(fn)
+    else:
+        pass
+
+
+
 if myemail == '':
     print('EMAIL ADDRESS REQUIRED')
     print('========================================')
@@ -146,13 +156,16 @@ df1 = build_input(dates)
 df1 = df1.drop_duplicates(subset = ['raw_ms_id'], keep = 'last')
 df2 = pd.read_csv('data/search_output.csv', error_bad_line=False, sep='|', encoding = 'latin1')
 
-# Note that the following line sometimes raises an error.  This is due to corruption of the csv data.
-# Setting error_bad_line=False in the above should get around this, but better to avoid writing corrupted data to csv!
+# Note that the following line sometimes raises an error.
+# This seems to be due to corruption of the csv data.
+# Setting error_bad_line=False in the above line should get around this,
+# but better to avoid writing corrupted data to csv.
 df2['earliest_date'] = pd.to_datetime(df2['earliest_date'], unit='ms') # convert unix timestamps in df2 to proper datetimes
 df = df1.merge(right=df2, how='left', left_on='Manuscript ID', right_on='ms_id')
 df['n_days'] = df['earliest_date'] - df['Decision Date']
 
-# add tla or other acronym from S1 ms_id (potentially useful for inputs with multiple journals)
+# add journal acronym from S1 ms_id
+# (potentially useful for inputs with multiple journals)
 df['Jnl_acro'] = df['Manuscript ID'].map(lambda x: x[:x.find('-')])
 
 # save output
