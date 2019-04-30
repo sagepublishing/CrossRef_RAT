@@ -1,6 +1,6 @@
 # Rejected article tracker
 
-This simple program will take a spreadsheet of ScholarOne submission data as input and return a spreadsheet of published articles with similar titles and author-names.
+This simple program will take a spreadsheet of ScholarOne submission data as input and return a spreadsheet of published articles with similar titles and author-names. The code and following instructions have been written for Python novices who should be able to use this to track articles rejected from a ScholarOne-based peer-review system. Advanced users should have no trouble adapting the code to work with other systems.
 
 ## How it works
 
