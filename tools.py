@@ -125,8 +125,8 @@ def search_cr(title, authors, pubdate_filter, myemail):
     # responses are generally <1s.
     # simple rule for sleeping if responses are slow
     if response_time > 2.0:
-        print('CrossRef slow to respond. To last request. Sleeping for a few seconds.')
-        time.sleep(int(response_time)+1)
+        print('CrossRef slow to respond to last request. Sleeping for a few seconds.')
+        time.sleep(int(response_time)*2)
 
     # read the json response as a dict
     rj = r.json()['message']['items']
