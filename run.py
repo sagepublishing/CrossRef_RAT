@@ -159,7 +159,7 @@ df2 = pd.read_csv('data/search_output.csv', error_bad_lines=False, sep='|', enco
 # This seems to be due to corruption of the csv data.
 # Setting error_bad_lines=False in the above line should get around this,
 # but better to avoid writing corrupted data to csv.
-# df2['earliest_date'] = pd.to_datetime(df2['earliest_date'], unit='ms') # convert unix timestamps in df2 to proper datetimes
+df2['earliest_date'] = pd.to_datetime(df2['earliest_date'], unit='ms') # convert unix timestamps in df2 to proper datetimes
 df = df1.merge(right=df2, how='left', left_on='Manuscript ID', right_on='ms_id')
 df['n_days'] = df['earliest_date'] - df['Decision Date']
 

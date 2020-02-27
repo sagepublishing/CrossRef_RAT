@@ -7,7 +7,7 @@ This simple program will take a spreadsheet of ScholarOne submission data as inp
 The process for obtaining this data is very simple and uses a utility made available by CrossRef.
 
 - To search for an article by title, we simply add the title to the end of this:
-> ?query.title=
+> ?query.bibliographic=
 - And add the author first name and last name to this
 > &query.author=
 - And then add those to this:
