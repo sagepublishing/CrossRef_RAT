@@ -9,9 +9,7 @@ import os
 import pandas as pd
 import numpy as np
 import requests
-
-
-
+import time
 
 def get_earliest_date(item):
     tags = ['issued','created','indexed','deposited']
@@ -108,7 +106,7 @@ def search_cr(title, authors, pubdate_filter, myemail):
     address = "https://api.crossref.org/works/"
      # search crossref
     payload = { 'filter'       : pubdate_filter,
-                'query.title'  : title,
+                'query.bibliographic'  : title,   # formerly query.title ... see: https://status.crossref.org/incidents/4y45gj63jsp4
                 'query.author' : authors,
                 'rows'         : 10} # you might want to change this...
 
@@ -157,6 +155,8 @@ def raw(s):
     """
     if '.R' in s:
         s = s[:s.find('.R')]
+    if 'R' in s:
+        s = s[:s.find('R')]
     return s
 
 def build_input(dates):

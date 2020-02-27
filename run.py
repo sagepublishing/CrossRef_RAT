@@ -47,7 +47,7 @@ df = pre_process(dates)
 
 successes_p = r'data/successes.json'
 
-if os.path.exists(successes_p)
+if os.path.exists(successes_p):
     with open(successes_p, 'r') as f:
         successes = json.loads(f.read())
 else:
@@ -69,7 +69,7 @@ else:
 if os.path.isfile('data/search_output.csv'):
     pass
 else:
-    with open('data/search_output.csv','w',encoding = 'utf-8') as f1: #,newline='')
+    with open('data/search_output.csv','w',encoding = 'utf-8') as f1: # ,newline='')
         writer=csv.writer(
                           f1,
                           delimiter = '|',
@@ -96,7 +96,6 @@ for index, row in df.iterrows():
 
             title = row['Manuscript Title']
             pubdate_filter = 'from-created-date:{}'.format(row['text_sub_date'])
-
             rj = search_cr(title, authors, pubdate_filter, myemail)
 
             rank = 0
@@ -119,9 +118,10 @@ for index, row in df.iterrows():
 
             successes.append(ms_id)
 
-        except:
+        except Exception as e:
             print("Fail. Couldn't find:", ms_id)
             print(row['Manuscript Title'])
+            print(e)
             failures.append(ms_id)
     else:
         print('Skipping',ms_id,'as already indexed')
@@ -153,13 +153,13 @@ for index, row in df.iterrows():
 
 df1 = build_input(dates)
 df1 = df1.drop_duplicates(subset = ['raw_ms_id'], keep = 'last')
-df2 = pd.read_csv('data/search_output.csv', error_bad_line=False, sep='|', encoding = 'latin1')
+df2 = pd.read_csv('data/search_output.csv', error_bad_lines=False, sep='|', encoding = 'latin1')
 
 # Note that the following line sometimes raises an error.
 # This seems to be due to corruption of the csv data.
-# Setting error_bad_line=False in the above line should get around this,
+# Setting error_bad_lines=False in the above line should get around this,
 # but better to avoid writing corrupted data to csv.
-df2['earliest_date'] = pd.to_datetime(df2['earliest_date'], unit='ms') # convert unix timestamps in df2 to proper datetimes
+# df2['earliest_date'] = pd.to_datetime(df2['earliest_date'], unit='ms') # convert unix timestamps in df2 to proper datetimes
 df = df1.merge(right=df2, how='left', left_on='Manuscript ID', right_on='ms_id')
 df['n_days'] = df['earliest_date'] - df['Decision Date']
 

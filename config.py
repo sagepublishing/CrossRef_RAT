@@ -9,7 +9,7 @@ Created on Mon May 14 16:52:20 2018
 # This program uses the CrossRef API extensively
 # adding your email address lets them know who is using it and
 # allows them to contact you if there are any problems.
-myemail = ""
+myemail = "adam.day@sagepub.co.uk"
 
 
 # set a threshold for Levenshtein distance between titles
@@ -21,4 +21,4 @@ threshold = 70
 # what submission date-range do you want to consider?
 # narrow your search here.
 # remember to put dates in the format YYYY-MM-DD with the start of the date range first
-dates = ['2007-01-01','2018-12-31']
+dates = ['2007-01-01','2020-02-27']
