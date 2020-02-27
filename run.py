@@ -121,7 +121,7 @@ for index, row in df.iterrows():
         except Exception as e:
             print("Fail. Couldn't find:", ms_id)
             print(row['Manuscript Title'])
-            print(e)
+            print('Error message', e)
             failures.append(ms_id)
     else:
         print('Skipping',ms_id,'as already indexed')

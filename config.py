@@ -9,7 +9,7 @@ Created on Mon May 14 16:52:20 2018
 # This program uses the CrossRef API extensively
 # adding your email address lets them know who is using it and
 # allows them to contact you if there are any problems.
-myemail = "adam.day@sagepub.co.uk"
+myemail = ""
 
 
 # set a threshold for Levenshtein distance between titles
