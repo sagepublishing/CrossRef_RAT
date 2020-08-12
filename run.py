@@ -5,9 +5,50 @@
 # || S1_id | S1_Title | S1_abstract | S1_Authors | S1_sub_date | S1_rej_date | S1_journal | match_DOI | match_title | match_authors | match_publisher | match_journal | match_pub_date | earliest_cr_date | title_similarity | CR_score | CR_cites | days_since_rej ||
 #
 
+
+## TODO - consider adding multithreading. You can do up to 50rps on the CrossRef API
+## EXAMPLE SCRIPT:
+# import threading
+# import time 
+# import requests
+
+# numCall = 20
+# # url 
+# url = "https://api.crossref.org/works"
+# class apiThread (threading.Thread):
+#     def __init__(self, name, url):
+#         threading.Thread.__init__(self)
+#         self.name = name
+#     def run(self):
+#         t_1 = time.time()
+#         email = 'adam.day@sagepub.co.uk'
+#         headers = {
+#         'User-Agent': 'Adam Day - data analysis',
+#         'mailto': email
+#         }
+#         response = requests.get(url, headers = headers)
+#         t_2 = time.time()
+#         print ("%s, status_code = %s, time = %s" % (self.name, response.status_code, (t_2-t_1)))
+
+# print ("Initiating test")
+# print ("Making %s calls to the API asynchronously" % (numCall))
+
+# threads = []
+# for x in range(numCall):
+#     threads.append(apiThread("API call %s" % ((x+1)), url))
+#     threads[-1].start()
+
+# # wait for all threads to finish                                            
+# for t in threads:                                                           
+#     t.join()  
+
+# print ("Exiting Main Thread")
+
+
+
 import os
 import pandas as pd
-from fuzzywuzzy import fuzz
+
 import json
 import csv
 import numpy as np
@@ -15,15 +56,15 @@ from datetime import datetime as dt
 
 from sklearn.linear_model import LogisticRegression
 import pickle
-from tools import get_output, search_cr, pre_process, build_input
+from fuzzywuzzy import fuzz
+from tools import *
 import config as c
 
 dates = c.dates
 myemail = c.myemail
 threshold = c.threshold
 
-
-def request_row(row, successes, failures):
+def request_row(row, successes, failures,myemail):
     """
     Takes dict of 'Manuscript ID', 'Manuscript Title' and 'Authors' (;-separated)
     Returns row of 
@@ -91,9 +132,7 @@ def request_row(row, successes, failures):
     else:
         print('Skipping',ms_id,'as already indexed')
         return None
-        
-
-
+    
 # load classifier
 with open('lr_model','rb') as f:
     clf = pickle.load(f)
@@ -172,7 +211,7 @@ output_batch = []
 for index, row in df.iterrows():
 
     # This should yield a dict if it works, None if not
-    output_row = request_row(row, successes, failures)
+    output_row = request_row(row, successes, failures, myemail)
     if type(output_row)==dict:
         output_batch.append(output_row)
 

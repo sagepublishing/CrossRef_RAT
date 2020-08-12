@@ -12,7 +12,11 @@ import requests
 import time
 import json
 
+
 def get_earliest_date(item):
+    """
+    Given a crossref works record, find the earliest date.
+    """
     tags = ['issued','created','indexed','deposited']
     stamps = []
     for tag in tags:
@@ -28,6 +32,9 @@ def get_earliest_date(item):
 
 
 def json_authors_to_list(authors):
+    """
+    Take JSON formatted author list from CrossRef data and convert to string in the same format as the search.
+    """
     match_authors = []
     for author in authors:
         try:
@@ -43,10 +50,16 @@ def json_authors_to_list(authors):
 
 
 def strip_newlines(s):
-	return s.replace('\n', ' ').replace('\r', '')
+    """
+    Strip new lines and replace with spaces
+    """
+    return s.replace('\n', ' ').replace('\r', '')
 
 
 def get_output(ms_id,item, authors, t_sim, rank):
+    """
+    Given search result data, put it into a form suitable for the output spreadsheet.
+    """
     match_title = strip_newlines(item['title'][0])
     score = item['score']
     match_doi = item['DOI']
@@ -156,12 +169,17 @@ def raw(s):
     Coverts ScholarOne MS_ID into its base form (i.e. removes revision number if present)
     """
     if '.R' in s:
-        s = s[:s.find('.R')]
-    if 'R' in s:
-        s = s[:s.find('R')]
+        s = s.split('.R')[0]
     return s
 
 def build_input(dates):
+    """
+    Preprocessing function for input data. 
+    Finds all input data and concatenates into 1 big dataframe
+    Discards rows with missing data
+    Ensures datetime columns are the correct data type
+    Limits data to specific date range
+    """
     filepaths = os.listdir('input')
 
     df = pd.DataFrame({})
@@ -196,6 +214,11 @@ def build_input(dates):
 
 
 def pre_process(dates):
+    """
+    Further preprocessing 
+     - drop duplicates
+     - drop anything which wasn't accepted (you might prefer to go with anything that was rejected)
+    """
     df = build_input(dates)
 
     # limit to article THAT WERE NOT ACCEPTED (not articles that were rejected! it might be interesting to see if articles sent for revision ended up elsewhere)
