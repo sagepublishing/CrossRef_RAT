@@ -10,15 +10,93 @@ import pandas as pd
 from fuzzywuzzy import fuzz
 import json
 import csv
+import numpy as np
 from datetime import datetime as dt
 
-
+from sklearn.linear_model import LogisticRegression
+import pickle
 from tools import get_output, search_cr, pre_process, build_input
 import config as c
 
 dates = c.dates
 myemail = c.myemail
 threshold = c.threshold
+
+
+def request_row(row, successes, failures):
+    """
+    Takes dict of 'Manuscript ID', 'Manuscript Title' and 'Authors' (;-separated)
+    Returns row of 
+    """
+    ms_id = row['Manuscript ID']
+    if ms_id not in successes:
+        try:
+            authors = row['Authors']
+            n_auths = len(authors.split('; '))
+            title = row['Manuscript Title']
+            pubdate_filter = 'from-created-date:{}'.format(row['text_sub_date'])
+            rj = search_cr(title, authors, pubdate_filter, myemail)
+
+            rank = 0
+            result_dois = []
+            result_scores = []
+            csv_rows = dict()
+            for item in rj:
+                rank += 1
+
+                if 'title' in item and type(item['title'])==str:
+                    match_title = item['title']
+                if 'title' in item and type(item['title'])==list:
+                    match_title = item['title']
+                t_sim = fuzz.ratio(title,match_title)
+                if t_sim < threshold:
+                    continue
+                else:
+                    csv_row = get_output(ms_id, item, authors, t_sim, rank)
+                    if csv_row['match_one']==False: # drop all results without at least one matching author name.
+                        pass
+                    else:
+                        doi = item['DOI']
+                        csv_rows[doi] = csv_row
+                        t_sim = t_sim
+                        match_all = csv_row['match_all']
+                        cr_score = csv_row['cr_score']
+                        rank = csv_row['rank']
+
+                        X = np.array([float(x) for x in [t_sim,match_all,cr_score,rank,n_auths]])
+                        clf_scores = clf.predict_proba(np.reshape(X,(1,5)))
+                        score = clf_scores[0][1]
+                        result_dois.append(doi)
+                        result_scores.append(score)
+            if len(result_scores)>0:
+                max_i = np.argmax(result_scores)
+                doi_out = result_dois[max_i]
+                score_out = result_scores[max_i]
+
+                # set a threshold for the logistic regression
+
+                if score_out >0.75:
+                    # update output if all conditions are met
+                    return csv_rows[doi_out]
+
+
+            successes.append(ms_id)
+
+        except Exception as e:
+            print("Fail. Couldn't find:", ms_id)
+            print(row['Manuscript Title'])
+            print('Error message', e)
+            failures.append(ms_id)
+            return None
+    else:
+        print('Skipping',ms_id,'as already indexed')
+        return None
+        
+
+
+# load classifier
+with open('lr_model','rb') as f:
+    clf = pickle.load(f)
 
 ## Requires 3 folders.  Create them if they don't exist
 folder_names = ['data','input','output']
@@ -45,6 +123,9 @@ if myemail == '':
 
 df = pre_process(dates)
 
+
+# Load lists of successful searches and failure searches. 
+# If we have interrupted this search in the past, we can skip these 
 successes_p = r'data/successes.json'
 
 if os.path.exists(successes_p):
@@ -65,7 +146,7 @@ else:
     with open(failures_p,'w') as f:
         json.dump(failures,f)
 
-# create file with title row
+# create file with title row if it doesn't exist
 if os.path.isfile('data/search_output.csv'):
     pass
 else:
@@ -81,51 +162,21 @@ else:
         writer.writerow(headers)
 
 # retrieve CR data and write to file
-
-output_batch= []
 i=0
 print()
 print(dt.now())
 print('Starting search of CrossRef. This may take some time...')
 print()
+
+output_batch = []
 for index, row in df.iterrows():
-    ms_id = row['Manuscript ID']
-    if ms_id not in successes:
-        try:
-            authors = row['Authors']
 
-            title = row['Manuscript Title']
-            pubdate_filter = 'from-created-date:{}'.format(row['text_sub_date'])
-            rj = search_cr(title, authors, pubdate_filter, myemail)
+    # This should yield a dict if it works, None if not
+    output_row = request_row(row, successes, failures)
+    if type(output_row)==dict:
+        output_batch.append(output_row)
 
-            rank = 0
-            for item in rj:
-                rank += 1
-                match_title = item['title'][0]
-#                 print(match_title)
-
-                t_sim = fuzz.ratio(title,match_title)
-#                 print(t_sim)
-                if t_sim < threshold:
-                    continue
-                else:
-                    csv_row = get_output(ms_id, item, authors, t_sim, rank)
-                    if csv_row[10]==False: # drop all results without at least one matching author name.
-                        pass
-#                    print(csv_row)
-                    else:
-                        output_batch.append(csv_row)
-
-            successes.append(ms_id)
-
-        except Exception as e:
-            print("Fail. Couldn't find:", ms_id)
-            print(row['Manuscript Title'])
-            print('Error message', e)
-            failures.append(ms_id)
-    else:
-        print('Skipping',ms_id,'as already indexed')
-        pass
+    # periodically write-out the data to file
     i+=1
     if i%100==0 or i >= df.shape[0]:
         print(dt.now())
@@ -138,7 +189,7 @@ for index, row in df.iterrows():
                                   lineterminator = '\r',
                                   quotechar = '"'
                                  )
-                writer.writerows(output_batch)
+                writer.writerows([[output_row[x] for x in output_row] for output_row in output_batch])
             output_batch = []
         with open(failures_p,'w') as f:
             json.dump(failures,f)

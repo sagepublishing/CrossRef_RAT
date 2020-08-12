@@ -82,21 +82,21 @@ def get_output(ms_id,item, authors, t_sim, rank):
 
     cr_score = score
     cr_cites = item['is-referenced-by-count']
-    return [ms_id,
-            match_doi,
-            match_type,
-           match_title,
-           match_authors,
-           publisher,
-           match_journal,
-           match_pub_date,
-           earliest_date,
-            t_sim,
-            match_one,
-            match_all,
-           cr_score,
-           cr_cites,
-           rank]
+    return {'ms_id': ms_id,
+            'match_doi': match_doi,
+            'match_type': match_type,
+            'match_title': match_title,
+            'match_authors': match_authors,
+            'publisher': publisher,
+            'journal': match_journal,
+            'match_pub_date': match_pub_date,
+            'earliest_date': earliest_date,
+            't_sim':t_sim,
+            'match_one':match_one,
+            'match_all': match_all,
+            'cr_score':cr_score,
+            'cr_cites':cr_cites,
+            'rank':rank}
 
 def search_cr(title, authors, pubdate_filter, myemail):
     """
@@ -126,7 +126,7 @@ def search_cr(title, authors, pubdate_filter, myemail):
     # responses are generally <1s.
     # simple rule for sleeping if responses are slow
     if response_time > 2.0:
-        sleep_time = int(response_time)*2
+        sleep_time = 0 #int(response_time)*2
         print('CrossRef slow to respond to last request. Sleeping for {} seconds.'.format(sleep_time))
         time.sleep(sleep_time)
 
