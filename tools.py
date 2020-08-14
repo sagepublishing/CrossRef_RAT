@@ -205,8 +205,9 @@ def build_input(dates):
 
 
     # set datetimes
-    df['Submission Date'] = pd.to_datetime(df['Submission Date'])
-    df['Decision Date'] = pd.to_datetime(df['Decision Date'])
+    df['Submission Date'] = pd.to_datetime(df['Submission Date'], errors='coerce')
+    df['Decision Date'] = pd.to_datetime(df['Decision Date'], errors='coerce')
+    
 
     # limit dates
     df = df[(df['Submission Date'] >= dates[0] ) & (df['Submission Date'] <= dates[1])]
