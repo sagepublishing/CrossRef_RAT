@@ -70,7 +70,8 @@ def request_row(row, successes, failures,myemail):
     Returns row of 
     """
     ms_id = row['Manuscript ID']
-    if ms_id not in successes:
+    successes_set = set(successes)
+    if ms_id not in successes_set:
         try:
             authors = row['Authors']
             n_auths = len(authors.split('; '))
