@@ -64,13 +64,12 @@ dates = c.dates
 myemail = c.myemail
 threshold = c.threshold
 
-def request_row(row, successes, failures,myemail):
+def request_row(row, successes, successes_set,myemail):
     """
     Takes dict of 'Manuscript ID', 'Manuscript Title' and 'Authors' (;-separated)
     Returns row of 
     """
     ms_id = row['Manuscript ID']
-    successes_set = set(successes)
     if ms_id not in successes_set:
         try:
             authors = row['Authors']
@@ -119,20 +118,21 @@ def request_row(row, successes, failures,myemail):
 
                 if score_out >0.75:
                     # update output if all conditions are met
-                    return csv_rows[doi_out]
+                    successes.append(ms_id)
+                    return csv_rows[doi_out], successes, failures
 
 
-            successes.append(ms_id)
+            
 
         except Exception as e:
             print("Fail. Couldn't find:", ms_id)
             print(row['Manuscript Title'])
             print('Error message', e)
             failures.append(ms_id)
-            return None
+            return None, successes, failures
     else:
         print('Skipping',ms_id,'as already indexed')
-        return None
+        return None, successes, failures
     
 # load classifier
 with open('lr_model','rb') as f:
@@ -207,12 +207,12 @@ print()
 print(dt.now())
 print('Starting search of CrossRef. This may take some time...')
 print()
-
+successes_set = set(successes)
 output_batch = []
 for index, row in df.iterrows():
 
     # This should yield a dict if it works, None if not
-    output_row = request_row(row, successes, failures, myemail)
+    output_row, successes, failures = request_row(row, successes, successes_set, myemail)
     if type(output_row)==dict:
         output_batch.append(output_row)
 

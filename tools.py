@@ -139,7 +139,7 @@ def search_cr(title, authors, pubdate_filter, myemail):
     # responses are generally <1s.
     # simple rule for sleeping if responses are slow
     if response_time > 2.0:
-        sleep_time = 0 #int(response_time)*2
+        sleep_time = int(response_time)#*2
         print('CrossRef slow to respond to last request. Sleeping for {} seconds.'.format(sleep_time))
         time.sleep(sleep_time)
 
