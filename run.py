@@ -212,9 +212,12 @@ output_batch = []
 for index, row in df.iterrows():
 
     # This should yield a dict if it works, None if not
-    output_row, successes, failures = request_row(row, successes, successes_set, myemail)
-    if type(output_row)==dict:
-        output_batch.append(output_row)
+    try:
+        output_row, successes, failures = request_row(row, successes, successes_set, myemail)
+        if type(output_row)==dict:
+            output_batch.append(output_row)
+    except:
+        continue
 
     # periodically write-out the data to file
     i+=1
