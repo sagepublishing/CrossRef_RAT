@@ -77,21 +77,26 @@ def request_row(row, successes, successes_set,myemail):
             title = row['Manuscript Title']
             pubdate_filter = 'from-created-date:{}'.format(row['text_sub_date'])
             rj = search_cr(title, authors, pubdate_filter, myemail)
-
             rank = 0
             result_dois = []
             result_scores = []
             csv_rows = dict()
+            # print(type(rj))
+            # print('lenrj', len(rj))
             for item in rj:
                 rank += 1
-
+                # print()
+                # print(item)
                 if 'title' in item and type(item['title'])==str:
                     match_title = item['title']
                 if 'title' in item and type(item['title'])==list:
-                    match_title = item['title']
+                    match_title = item['title'][0]
+                # if 'title' not in item:
+                #     print('no title', item)
+                # print('match title', match_title)
                 t_sim = fuzz.ratio(title,match_title)
                 if t_sim < threshold:
-                    continue
+                    pass
                 else:
                     csv_row = get_output(ms_id, item, authors, t_sim, rank)
                     if csv_row['match_one']==False: # drop all results without at least one matching author name.
@@ -109,21 +114,19 @@ def request_row(row, successes, successes_set,myemail):
                         score = clf_scores[0][1]
                         result_dois.append(doi)
                         result_scores.append(score)
-            if len(result_scores)>0:
-                max_i = np.argmax(result_scores)
-                doi_out = result_dois[max_i]
-                score_out = result_scores[max_i]
+                    if len(result_scores)>0:
+                        max_i = np.argmax(result_scores)
+                        doi_out = result_dois[max_i]
+                        score_out = result_scores[max_i]
 
-                # set a threshold for the logistic regression
+                        # set a threshold for the logistic regression
 
-                if score_out >0.75:
-                    # update output if all conditions are met
-                    successes.append(ms_id)
-                    return csv_rows[doi_out], successes, failures
-
-
-            
-
+                        if score_out >0.75:
+                            # update output if all conditions are met
+                            successes.append(ms_id)
+                            return csv_rows[doi_out], successes, failures
+                if rank == len(rj):
+                    return None, successes, failures
         except Exception as e:
             print("Fail. Couldn't find:", ms_id)
             print(row['Manuscript Title'])
@@ -209,19 +212,23 @@ print('Starting search of CrossRef. This may take some time...')
 print()
 successes_set = set(successes)
 output_batch = []
-for index, row in df.iterrows():
+for ind, row in df.iterrows():
 
     # This should yield a dict if it works, None if not
     try:
         output_row, successes, failures = request_row(row, successes, successes_set, myemail)
         if type(output_row)==dict:
             output_batch.append(output_row)
-    except:
+        else:
+            print('output row not dict?')
+    except Exception as e:
+        print('ERROR', e)
+
         continue
 
     # periodically write-out the data to file
     i+=1
-    if i%100==0 or i >= df.shape[0]:
+    if len(output_batch)>=4 or ind >= df.shape[0]:
         print(dt.now())
         print(i,'/',df.shape[0],'iterations complete')
         if output_batch!=[]:
@@ -242,7 +249,6 @@ for index, row in df.iterrows():
         print('(If you need to pause, hit ctrl+c now that the write process is complete.')
         print('You can restart from where you left off at any time)')
         print()
-
 
 
 df1 = build_input(dates)

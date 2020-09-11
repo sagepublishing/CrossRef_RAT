@@ -125,7 +125,7 @@ def search_cr(title, authors, pubdate_filter, myemail):
                 'rows'         : 10} # you might want to change this...
 
     headers = {
-    'User-Agent': "Adam Day's rejected article tracker",
+    'User-Agent': "SAGE's rejected article tracker",
     'mailto': myemail
     }
 
@@ -142,7 +142,7 @@ def search_cr(title, authors, pubdate_filter, myemail):
         sleep_time = int(response_time)#*2
         print('CrossRef slow to respond to last request. Sleeping for {} seconds.'.format(sleep_time))
         time.sleep(sleep_time)
-
+    
     # read the json response as a dict
     rj = r.json()['message']['items']
     return rj

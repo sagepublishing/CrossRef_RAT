@@ -21,4 +21,4 @@ threshold = 70
 # what submission date-range do you want to consider?
 # narrow your search here.
 # remember to put dates in the format YYYY-MM-DD with the start of the date range first
-dates = ['2007-01-01','2020-02-27']
+dates = ['2007-01-01','2020-12-27']
